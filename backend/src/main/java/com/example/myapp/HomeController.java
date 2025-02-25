@@ -5,17 +5,21 @@
  */
 package com.example.myapp;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * HomeController provides a basic endpoint for the API.
+ */
 @RestController
-// Allow calls from the React dev server running on localhost:3000
-@CrossOrigin(origins = "http://localhost:3000")
 public class HomeController {
-    
-    @GetMapping("/api/home")
+
+    /**
+     * Basic endpoint for the root path.
+     * @return A welcome message.
+     */
+    @GetMapping("/")
     public String home() {
-        return "Stinger";
+        return "Welcome to the Movie Catalog API";
     }
 }
