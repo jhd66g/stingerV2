@@ -1,2 +1,21 @@
 /* MovieDetailsPage.css */
-.movie-details { }
+
+.movie-details {
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: sans-serif;
+  }
+  
+  .movie-details h1 {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .movie-details p {
+    margin: 0.5rem 0;
+  }
+  
+  .movie-details a {
+    display: inline-block;
+    margin-bottom: 1rem;
+  }

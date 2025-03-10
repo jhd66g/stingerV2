@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * HomeController provides a basic endpoint for the API.
+ * HomeController provides a basic API endpoint.
  */
 @RestController
 public class HomeController {
 
     /**
-     * Basic endpoint for the root path.
-     * @return A welcome message.
+     * Returns a welcome message.
+     * @return A welcome string.
      */
     @GetMapping("/")
     public String home() {
