@@ -6,12 +6,11 @@ function MovieDetailsPage() {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
 
-  // Fetch the movie details by ID
   useEffect(() => {
     fetch(`/api/movies/${id}`)
       .then((res) => res.json())
       .then((data) => setMovie(data))
-      .catch((err) => console.error("Error fetching movie details:", err));
+      .catch((err) => console.error('Error fetching movie details:', err));
   }, [id]);
 
   if (!movie) {
@@ -23,29 +22,32 @@ function MovieDetailsPage() {
       <Link to="/">← Back to Catalog</Link>
       <h1>{movie.title}</h1>
 
-      {/* Streaming Service(s) */}
-      <p>{movie.streaming_service}</p>
+      {/* Show streaming service(s) */}
+      <p>Available on {movie.streaming_service}</p>
 
-      {/* Genre(s) */}
-      <p>{movie.genres.join(', ')}</p>
+      {/* Show genres */}
+      <p>Genres: {movie.genres.join(', ')}</p>
 
-      {/* Studio */}
+      {/* Show studio */}
       <p>Studio: {movie.studio.join(', ')}</p>
 
-      {/* Director */}
+      {/* Show director(s) */}
       <p>Director: {movie.director.join(', ')}</p>
 
-      {/* Cast */}
+      {/* Show cast */}
       <p>Cast: {movie.cast.join(', ')}</p>
 
-      {/* Overview */}
+      {/* Show overview */}
       <p>{movie.overview}</p>
 
-      {/* Release date */}
+      {/* Show release date */}
       <p>Release date: {movie.release_date}</p>
 
-      {/* Runtime */}
+      {/* Show runtime */}
       <p>Runtime: {movie.runtime} minutes</p>
+
+      {/* Show rating (vote_average) */}
+      <p>Rating: {movie.vote_average}</p>
     </div>
   );
 }

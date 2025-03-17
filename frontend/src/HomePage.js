@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Range } from 'react-range';
 import './HomePage.css';
 
 /**
  * A sub-component that renders a double-ended slider for rating range (0–10).
- * This uses the `react-range` library.
+ * Uses the `react-range` library.
  */
 function RatingSlider({ minRating, maxRating, setMinRating, setMaxRating }) {
   const STEP = 0.1;
   const MIN = 0;
   const MAX = 10;
-
-  // We store the current slider values as [min, max].
   const values = [minRating, maxRating];
 
   const handleChange = (newValues) => {
@@ -63,17 +61,20 @@ function RatingSlider({ minRating, maxRating, setMinRating, setMaxRating }) {
 
 /**
  * HomePage component:
- * - Fetches streaming services and all movies from the backend.
- * - Lets users filter by streaming service, genre, and rating range.
+ * - Fetches streaming services and all movies from the backend once.
+ * - Lets users filter by streaming service, genre, and rating range (using vote_average).
  * - Lets users sort by title, rating, or popularity.
- * - Displays the filtered/sorted list of movies.
+ * - Saves the state in the URL query parameters so that filters persist across navigation.
  */
 function HomePage() {
+  // Use searchParams from React Router v6.
+  const [searchParams, setSearchParams] = useSearchParams();
+
   // Streaming services
   const [streamingServices, setStreamingServices] = useState([]);
   const [activeServices, setActiveServices] = useState({});
 
-  // Movie data
+  // Movies
   const [allMovies, setAllMovies] = useState([]);
   const [filteredMovies, setFilteredMovies] = useState([]);
 
@@ -81,80 +82,89 @@ function HomePage() {
   const [genres, setGenres] = useState([]);
   const [selectedGenres, setSelectedGenres] = useState({});
 
-  // Rating range (min, max)
-  const [minRating, setMinRating] = useState(0);
-  const [maxRating, setMaxRating] = useState(10);
+  // Rating range state (using vote_average)
+  const [minRating, setMinRating] = useState(() => parseFloat(searchParams.get('min')) || 0);
+  const [maxRating, setMaxRating] = useState(() => parseFloat(searchParams.get('max')) || 10);
 
-  // Sort option
-  const [sortOption, setSortOption] = useState('alphabetical');
+  // Sort option state
+  const [sortOption, setSortOption] = useState(() => searchParams.get('sort') || 'alphabetical');
 
-  /**
-   * On mount, fetch streaming services and all movies.
-   */
+  // Fetch streaming services and movies only once on mount.
   useEffect(() => {
-    // Fetch streaming services
+    // Fetch streaming services and sort them alphabetically.
     fetch('/api/streaming-services')
       .then(res => res.json())
       .then(data => {
-        setStreamingServices(data);
-        // Default: all services are active
-        const active = {};
-        data.forEach(svc => { active[svc] = true; });
+        const sortedServices = data.sort((a, b) => a.localeCompare(b));
+        setStreamingServices(sortedServices);
+        // Initialize active services from URL if available.
+        const svcParam = searchParams.get('services');
+        let active = {};
+        if (svcParam) {
+          const svcArray = svcParam.split(',');
+          sortedServices.forEach(svc => { active[svc] = svcArray.includes(svc); });
+        } else {
+          sortedServices.forEach(svc => { active[svc] = true; });
+        }
         setActiveServices(active);
       })
       .catch(err => console.error('Error fetching streaming services:', err));
 
-    // Fetch all movies
+    // Fetch all movies.
     fetch('/api/movies/all')
       .then(res => res.json())
       .then(data => {
         setAllMovies(data);
-
-        // Derive distinct genres from the movie list
+        // Derive distinct genres from the movie list and sort them.
         const genreSet = new Set();
         data.forEach(movie => {
           movie.genres.forEach(g => genreSet.add(g));
         });
-        const genreArr = Array.from(genreSet);
+        const genreArr = Array.from(genreSet).sort((a, b) => a.localeCompare(b));
         setGenres(genreArr);
 
-        // Default: no genres selected
-        const selected = {};
-        genreArr.forEach(g => { selected[g] = false; });
+        // Initialize selected genres from URL if available.
+        const genreParam = searchParams.get('genres');
+        let selected = {};
+        if (genreParam) {
+          const genreArray = genreParam.split(',');
+          genreArr.forEach(g => { selected[g] = genreArray.includes(g); });
+        } else {
+          genreArr.forEach(g => { selected[g] = false; });
+        }
         setSelectedGenres(selected);
 
-        // Initialize filteredMovies as everything, sorted A–Z
+        // Initialize filteredMovies as everything, sorted A–Z.
         const sorted = [...data].sort((a, b) => a.title.localeCompare(b.title));
         setFilteredMovies(sorted);
       })
       .catch(err => console.error('Error fetching movies:', err));
-  }, []);
+  }, []); // run only once on mount
 
   /**
-   * updateFilteredMovies:
-   * Filters by streaming service, rating range, and selected genres,
-   * then sorts according to the chosen sort option.
+   * Updates filteredMovies based on active streaming services, selected genres,
+   * and rating range (vote_average), then sorts by the chosen sort option.
    */
   const updateFilteredMovies = () => {
     let movies = [...allMovies];
 
-    // 1) Filter by streaming services
+    // Filter by active streaming services.
     movies = movies.filter(movie => activeServices[movie.streaming_service]);
 
-    // 2) Filter by rating range
-    movies = movies.filter(movie => (
+    // Filter by rating range.
+    movies = movies.filter(movie => 
       movie.vote_average >= minRating && movie.vote_average <= maxRating
-    ));
+    );
 
-    // 3) Filter by selected genres
-    const activeGenres = Object.keys(selectedGenres).filter(g => selectedGenres[g]);
-    if (activeGenres.length > 0) {
+    // Filter by selected genres (if any are active).
+    const activeGenreKeys = Object.keys(selectedGenres).filter(g => selectedGenres[g]);
+    if (activeGenreKeys.length > 0) {
       movies = movies.filter(movie =>
-        movie.genres.some(genre => activeGenres.includes(genre))
+        movie.genres.some(genre => activeGenreKeys.includes(genre))
       );
     }
 
-    // 4) Sort
+    // Sort the movies.
     if (sortOption === 'alphabetical') {
       movies.sort((a, b) => a.title.localeCompare(b.title));
     } else if (sortOption === 'rating') {
@@ -166,11 +176,29 @@ function HomePage() {
     setFilteredMovies(movies);
   };
 
-  // Whenever any filter or sort state changes, recalculate filteredMovies
+  // Update filteredMovies whenever dependencies change.
   useEffect(() => {
     updateFilteredMovies();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeServices, selectedGenres, minRating, maxRating, sortOption, allMovies]);
+
+  // Update URL query parameters when filter state changes.
+  useEffect(() => {
+    const svcActive = Object.entries(activeServices)
+      .filter(([_, active]) => active)
+      .map(([svc]) => svc)
+      .join(',');
+    const genreActive = Object.entries(selectedGenres)
+      .filter(([_, active]) => active)
+      .map(([genre]) => genre)
+      .join(',');
+    setSearchParams({
+      sort: sortOption,
+      min: minRating,
+      max: maxRating,
+      services: svcActive,
+      genres: genreActive
+    });
+  }, [activeServices, selectedGenres, minRating, maxRating, sortOption, setSearchParams]);
 
   /**
    * Toggle a streaming service on/off.
@@ -190,6 +218,31 @@ function HomePage() {
       ...prev,
       [genre]: !prev[genre]
     }));
+  };
+
+  /**
+   * Renders active filters as a stack of tags.
+   */
+  const renderActiveFilters = () => {
+    const activeServiceFilters = Object.entries(activeServices)
+      .filter(([_, active]) => active)
+      .map(([svc]) => svc);
+    const activeGenreFilters = Object.entries(selectedGenres)
+      .filter(([_, active]) => active)
+      .map(([genre]) => genre);
+    return (
+      <div className="active-filters">
+        {activeServiceFilters.map(filter => (
+          <span key={`svc-${filter}`} className="filter-tag">{filter}</span>
+        ))}
+        {activeGenreFilters.map(filter => (
+          <span key={`genre-${filter}`} className="filter-tag">{filter}</span>
+        ))}
+        <span className="filter-tag">
+          Rating: {minRating.toFixed(1)} — {maxRating.toFixed(1)}
+        </span>
+      </div>
+    );
   };
 
   return (
@@ -221,26 +274,30 @@ function HomePage() {
         <nav className="sidebar">
           <h4>Streaming Service</h4>
           {streamingServices.map(service => (
-            <label key={service}>
-              <input
-                type="checkbox"
-                checked={activeServices[service] || false}
-                onChange={() => handleServiceToggle(service)}
-              />
-              {service}
-            </label>
+            <div key={service}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={activeServices[service] || false}
+                  onChange={() => handleServiceToggle(service)}
+                />
+                {service}
+              </label>
+            </div>
           ))}
 
           <h4>Genre</h4>
           {genres.map(genre => (
-            <label key={genre}>
-              <input
-                type="checkbox"
-                checked={selectedGenres[genre] || false}
-                onChange={() => handleGenreToggle(genre)}
-              />
-              {genre}
-            </label>
+            <div key={genre}>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={selectedGenres[genre] || false}
+                  onChange={() => handleGenreToggle(genre)}
+                />
+                {genre}
+              </label>
+            </div>
           ))}
 
           {/* Single double-ended rating slider */}
@@ -254,7 +311,8 @@ function HomePage() {
 
         {/* Catalog (right column) */}
         <main className="catalog">
-          <h2>MOVIES</h2>
+          <h3>Movies</h3>
+          {renderActiveFilters()}
           <ul>
             {filteredMovies.map(movie => (
               <li key={movie.id}>
