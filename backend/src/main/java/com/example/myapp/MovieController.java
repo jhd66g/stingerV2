@@ -10,6 +10,7 @@
  import org.springframework.web.bind.annotation.GetMapping;
  import org.springframework.web.bind.annotation.PathVariable;
  import org.springframework.web.bind.annotation.RestController;
+ import org.springframework.web.bind.annotation.RequestParam;
  
  import java.util.List;
  
@@ -57,4 +58,25 @@
      public List<String> getStreamingServices() {
          return movieService.getStreamingServices();
      }
+
+     /**
+     * Returns the list of movies filtered by the provided query parameters.
+     * 
+     * @param services (optional) comma-separated streaming services
+     * @param genres (optional) comma-separated genres
+     * @param min (optional) minimum vote_average (default: 0)
+     * @param max (optional) maximum vote_average (default: 10)
+     * @param sort (optional) sort option: alphabetical, rating, or popularity (default: alphabetical)
+     * @return List of filtered and sorted movies.
+     */
+    @GetMapping("/api/movies/filtered")
+    public List<Movie> getFilteredMovies(
+            @RequestParam(required = false) String services,
+            @RequestParam(required = false) String genres,
+            @RequestParam(defaultValue = "0") double min,
+            @RequestParam(defaultValue = "10") double max,
+            @RequestParam(defaultValue = "alphabetical") String sort
+    ) {
+        return movieService.getFilteredMovies(services, genres, min, max, sort);
+    }
  }

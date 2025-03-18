@@ -17,7 +17,8 @@
  import java.util.Optional;
  import java.util.Set;
  import java.util.stream.Collectors;
- 
+ import java.util.Arrays;
+
  /**
   * Service class for loading and processing movie data.
   */
@@ -80,4 +81,49 @@
                  .collect(Collectors.toSet());
          return services.stream().collect(Collectors.toList());
      }
- }
+
+     /**
+     * Returns a list of movies filtered by streaming services, genres, and rating range,
+     * then sorted by the given sort option.
+     * 
+     * @param services A comma‑separated list of streaming services (e.g., "Hulu,Max")
+     * @param genres A comma‑separated list of genres (e.g., "Action,War")
+     * @param minRating The minimum vote_average
+     * @param maxRating The maximum vote_average
+     * @param sortOption The sort order: "alphabetical", "rating", or "popularity"
+     * @return A list of filtered and sorted movies.
+     */
+    public List<Movie> getFilteredMovies(String services, String genres, double minRating, double maxRating, String sortOption) {
+        List<Movie> filtered = movies.stream()
+            // Filter by streaming service if provided.
+            .filter(movie -> {
+                if (services != null && !services.isEmpty()) {
+                    List<String> svcList = Arrays.asList(services.split(","));
+                    return svcList.contains(movie.getStreaming_service());
+                }
+                return true;
+            })
+            // Filter by genres if provided. Movie must have at least one matching genre.
+            .filter(movie -> {
+                if (genres != null && !genres.isEmpty()) {
+                    List<String> genreList = Arrays.asList(genres.split(","));
+                    return movie.getGenres().stream().anyMatch(genreList::contains);
+                }
+                return true;
+            })
+            // Filter by rating (vote_average)
+            .filter(movie -> movie.getVote_average() >= minRating && movie.getVote_average() <= maxRating)
+            .collect(Collectors.toList());
+
+        // Sort the list based on sortOption
+        if ("alphabetical".equalsIgnoreCase(sortOption)) {
+            filtered.sort((a, b) -> a.getTitle().compareToIgnoreCase(b.getTitle()));
+        } else if ("rating".equalsIgnoreCase(sortOption)) {
+            filtered.sort((a, b) -> Double.compare(b.getVote_average(), a.getVote_average()));
+        } else if ("popularity".equalsIgnoreCase(sortOption)) {
+            filtered.sort((a, b) -> Double.compare(b.getPopularity(), a.getPopularity()));
+        }
+
+        return filtered;
+    }
+}

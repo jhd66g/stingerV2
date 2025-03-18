@@ -62,9 +62,9 @@ function RatingSlider({ minRating, maxRating, setMinRating, setMaxRating }) {
 /**
  * HomePage component:
  * - Fetches streaming services and all movies from the backend once.
- * - Lets users filter by streaming service, genre, and rating range (using vote_average).
- * - Lets users sort by title, rating, or popularity.
- * - Saves the state in the URL query parameters so that filters persist across navigation.
+ * - Stores filter state (streaming services, genres, rating range, sort option).
+ * - When "Update Filters" is clicked, builds a query string and fetches filtered movies from the backend.
+ * - Provides Clear buttons to uncheck streaming service and genre filters.
  */
 function HomePage() {
   // Use searchParams from React Router v6.
@@ -75,7 +75,6 @@ function HomePage() {
   const [activeServices, setActiveServices] = useState({});
 
   // Movies
-  const [allMovies, setAllMovies] = useState([]);
   const [filteredMovies, setFilteredMovies] = useState([]);
 
   // Genres
@@ -89,15 +88,14 @@ function HomePage() {
   // Sort option state
   const [sortOption, setSortOption] = useState(() => searchParams.get('sort') || 'alphabetical');
 
-  // Fetch streaming services and movies only once on mount.
+  // Fetch streaming services and movies once on mount.
   useEffect(() => {
-    // Fetch streaming services and sort them alphabetically.
+    // Fetch streaming services.
     fetch('/api/streaming-services')
       .then(res => res.json())
       .then(data => {
         const sortedServices = data.sort((a, b) => a.localeCompare(b));
         setStreamingServices(sortedServices);
-        // Initialize active services from URL if available.
         const svcParam = searchParams.get('services');
         let active = {};
         if (svcParam) {
@@ -110,95 +108,60 @@ function HomePage() {
       })
       .catch(err => console.error('Error fetching streaming services:', err));
 
-    // Fetch all movies.
+    // Fetch all movies to derive the genres.
     fetch('/api/movies/all')
       .then(res => res.json())
       .then(data => {
-        setAllMovies(data);
-        // Derive distinct genres from the movie list and sort them.
         const genreSet = new Set();
         data.forEach(movie => {
           movie.genres.forEach(g => genreSet.add(g));
         });
         const genreArr = Array.from(genreSet).sort((a, b) => a.localeCompare(b));
         setGenres(genreArr);
-
-        // Initialize selected genres from URL if available.
         const genreParam = searchParams.get('genres');
         let selected = {};
         if (genreParam) {
           const genreArray = genreParam.split(',');
           genreArr.forEach(g => { selected[g] = genreArray.includes(g); });
         } else {
-          genreArr.forEach(g => { selected[g] = false; });
+          // Default: all genres are checked.
+          genreArr.forEach(g => { selected[g] = true; });
         }
         setSelectedGenres(selected);
-
-        // Initialize filteredMovies as everything, sorted A–Z.
-        const sorted = [...data].sort((a, b) => a.title.localeCompare(b.title));
-        setFilteredMovies(sorted);
+        // Initially fetch filtered movies using the current (or default) filters.
+        updateFilteredMovies(activeServices, selected, minRating, maxRating, sortOption);
       })
       .catch(err => console.error('Error fetching movies:', err));
-  }, []); // run only once on mount
+  }, []); // run once on mount
 
   /**
-   * Updates filteredMovies based on active streaming services, selected genres,
-   * and rating range (vote_average), then sorts by the chosen sort option.
+   * Calls the backend filtering endpoint with the current filter state.
    */
-  const updateFilteredMovies = () => {
-    let movies = [...allMovies];
-
-    // Filter by active streaming services.
-    movies = movies.filter(movie => activeServices[movie.streaming_service]);
-
-    // Filter by rating range.
-    movies = movies.filter(movie => 
-      movie.vote_average >= minRating && movie.vote_average <= maxRating
-    );
-
-    // Filter by selected genres (if any are active).
-    const activeGenreKeys = Object.keys(selectedGenres).filter(g => selectedGenres[g]);
-    if (activeGenreKeys.length > 0) {
-      movies = movies.filter(movie =>
-        movie.genres.some(genre => activeGenreKeys.includes(genre))
-      );
-    }
-
-    // Sort the movies.
-    if (sortOption === 'alphabetical') {
-      movies.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortOption === 'rating') {
-      movies.sort((a, b) => b.vote_average - a.vote_average);
-    } else if (sortOption === 'popularity') {
-      movies.sort((a, b) => b.popularity - a.popularity);
-    }
-
-    setFilteredMovies(movies);
-  };
-
-  // Update filteredMovies whenever dependencies change.
-  useEffect(() => {
-    updateFilteredMovies();
-  }, [activeServices, selectedGenres, minRating, maxRating, sortOption, allMovies]);
-
-  // Update URL query parameters when filter state changes.
-  useEffect(() => {
-    const svcActive = Object.entries(activeServices)
+  const updateFilteredMovies = (active = activeServices, selected = selectedGenres, min = minRating, max = maxRating, sort = sortOption) => {
+    const svcActive = Object.entries(active)
       .filter(([_, active]) => active)
       .map(([svc]) => svc)
       .join(',');
-    const genreActive = Object.entries(selectedGenres)
+    const genreActive = Object.entries(selected)
       .filter(([_, active]) => active)
       .map(([genre]) => genre)
       .join(',');
-    setSearchParams({
-      sort: sortOption,
-      min: minRating,
-      max: maxRating,
+    const params = new URLSearchParams({
+      sort: sort,
+      min: min,
+      max: max,
       services: svcActive,
       genres: genreActive
     });
-  }, [activeServices, selectedGenres, minRating, maxRating, sortOption, setSearchParams]);
+    // Update the URL query parameters.
+    setSearchParams(params);
+
+    // Fetch filtered movies from the backend.
+    fetch(`/api/movies/filtered?${params.toString()}`)
+      .then(res => res.json())
+      .then(data => setFilteredMovies(data))
+      .catch(err => console.error('Error fetching filtered movies:', err));
+  };
 
   /**
    * Toggle a streaming service on/off.
@@ -218,6 +181,28 @@ function HomePage() {
       ...prev,
       [genre]: !prev[genre]
     }));
+  };
+
+  /**
+   * Clears all streaming service filters (unchecks all).
+   */
+  const clearStreamingServices = () => {
+    const cleared = {};
+    streamingServices.forEach(svc => {
+      cleared[svc] = false;
+    });
+    setActiveServices(cleared);
+  };
+
+  /**
+   * Clears all genre filters (unchecks all).
+   */
+  const clearGenres = () => {
+    const cleared = {};
+    genres.forEach(g => {
+      cleared[g] = false;
+    });
+    setSelectedGenres(cleared);
   };
 
   /**
@@ -285,6 +270,7 @@ function HomePage() {
               </label>
             </div>
           ))}
+          <button onClick={clearStreamingServices}>Clear Streaming Services</button>
 
           <h4>Genre</h4>
           {genres.map(genre => (
@@ -299,14 +285,18 @@ function HomePage() {
               </label>
             </div>
           ))}
+          <button onClick={clearGenres}>Clear Genres</button>
 
-          {/* Single double-ended rating slider */}
+          {/* Rating slider */}
           <RatingSlider
             minRating={minRating}
             maxRating={maxRating}
             setMinRating={setMinRating}
             setMaxRating={setMaxRating}
           />
+
+          {/* Update Filters Button */}
+          <button onClick={() => updateFilteredMovies()}>Update Filters</button>
         </nav>
 
         {/* Catalog (right column) */}
