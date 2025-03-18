@@ -26,7 +26,7 @@ public class Movie {
     private List<String> cast;
     private List<String> director;
     private List<String> studio;
-    private String streaming_service;
+    private List<String> streaming_services;
 
     /**
      * Returns the movie ID.
@@ -256,15 +256,16 @@ public class Movie {
      * Returns the streaming service.
      * @return streaming service.
      */
-    public String getStreaming_service() {
-        return streaming_service;
+    public List<String> getStreaming_services() { 
+        return streaming_services; 
     }
+    
 
     /**
      * Sets the streaming service.
-     * @param streaming_service streaming service.
+     * @param streaming_services streaming service.
      */
-    public void setStreaming_service(String streaming_service) {
-        this.streaming_service = streaming_service;
+    public void setStreaming_services(List<String> streaming_services) { 
+        this.streaming_services = streaming_services; 
     }
 }
