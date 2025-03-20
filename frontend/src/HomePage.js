@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Range } from 'react-range';
 import './HomePage.css';
 
 /**
- * A sub-component that renders a double-ended slider for rating range (0–10).
- * Uses the `react-range` library.
+ * Renders a double-ended slider for rating range (0–10) using react-range.
  */
 function RatingSlider({ minRating, maxRating, setMinRating, setMaxRating }) {
   const STEP = 0.1;
@@ -61,35 +60,48 @@ function RatingSlider({ minRating, maxRating, setMinRating, setMaxRating }) {
 
 /**
  * HomePage component:
- * - Fetches streaming services and all movies once on mount.
- * - Maintains filter state (streaming services, genres, rating range) and sort option.
- * - Only applies the filters (by calling the backend) when the user clicks "Update Filters."
- * - Sorts the currently displayed movies instantly when the sort option changes.
- * - Provides clear buttons for streaming services and genres.
+ * - On mount, fetches streaming services and movies (for genres) once.
+ * - Initializes filter state (active streaming services, selected genres, rating range, sort option)
+ *   from localStorage if available; otherwise, uses defaults.
+ * - The "Update" button calls the backend filtering endpoint with the current filter state.
+ * - Changing the sort option immediately re-sorts the displayed movies.
+ * - Clear buttons allow unchecking all streaming service or genre filters.
  */
 function HomePage() {
-  // URL query parameters
-  const [searchParams, setSearchParams] = useSearchParams();
-
   // Streaming services state
   const [streamingServices, setStreamingServices] = useState([]);
-  const [activeServices, setActiveServices] = useState({});
+  const [activeServices, setActiveServices] = useState(() => {
+    const stored = localStorage.getItem("activeServices");
+    return stored ? JSON.parse(stored) : {};
+  });
 
-  // Movies state (filtered movies returned from the backend)
+  // Movies state (the filtered movies returned from the backend)
   const [filteredMovies, setFilteredMovies] = useState([]);
 
   // Genres state
   const [genres, setGenres] = useState([]);
-  const [selectedGenres, setSelectedGenres] = useState({});
+  const [selectedGenres, setSelectedGenres] = useState(() => {
+    const stored = localStorage.getItem("selectedGenres");
+    return stored ? JSON.parse(stored) : {};
+  });
 
   // Rating range state (using vote_average)
-  const [minRating, setMinRating] = useState(() => parseFloat(searchParams.get('min')) || 0);
-  const [maxRating, setMaxRating] = useState(() => parseFloat(searchParams.get('max')) || 10);
+  const [minRating, setMinRating] = useState(() => {
+    const stored = localStorage.getItem("minRating");
+    return stored ? parseFloat(stored) : 0;
+  });
+  const [maxRating, setMaxRating] = useState(() => {
+    const stored = localStorage.getItem("maxRating");
+    return stored ? parseFloat(stored) : 10;
+  });
 
   // Sort option state
-  const [sortOption, setSortOption] = useState(() => searchParams.get('sort') || 'alphabetical');
+  const [sortOption, setSortOption] = useState(() => {
+    const stored = localStorage.getItem("sortOption");
+    return stored || "alphabetical";
+  });
 
-  // On mount, fetch streaming services and all movies (for deriving genres).
+  // On mount, fetch streaming services and movies (for deriving genres).
   useEffect(() => {
     // Fetch streaming services.
     fetch('/api/streaming-services')
@@ -97,16 +109,13 @@ function HomePage() {
       .then(data => {
         const sortedServices = data.sort((a, b) => a.localeCompare(b));
         setStreamingServices(sortedServices);
-        const svcParam = searchParams.get('services');
-        let active = {};
-        if (svcParam) {
-          const svcArray = svcParam.split(',');
-          sortedServices.forEach(svc => { active[svc] = svcArray.includes(svc); });
-        } else {
-          // Default: all streaming services are checked.
-          sortedServices.forEach(svc => { active[svc] = true; });
+        // If localStorage for activeServices is empty, default all to true.
+        if (Object.keys(activeServices).length === 0) {
+          const defaults = {};
+          sortedServices.forEach(svc => { defaults[svc] = true; });
+          setActiveServices(defaults);
+          localStorage.setItem("activeServices", JSON.stringify(defaults));
         }
-        setActiveServices(active);
       })
       .catch(err => console.error('Error fetching streaming services:', err));
 
@@ -120,44 +129,46 @@ function HomePage() {
         });
         const genreArr = Array.from(genreSet).sort((a, b) => a.localeCompare(b));
         setGenres(genreArr);
-        const genreParam = searchParams.get('genres');
-        let selected = {};
-        if (genreParam) {
-          const genreArray = genreParam.split(',');
-          genreArr.forEach(g => { selected[g] = genreArray.includes(g); });
-        } else {
-          // Default: all genres are checked.
-          genreArr.forEach(g => { selected[g] = true; });
+        // If localStorage for selectedGenres is empty, default all to true.
+        if (Object.keys(selectedGenres).length === 0) {
+          const defaults = {};
+          genreArr.forEach(g => { defaults[g] = true; });
+          setSelectedGenres(defaults);
+          localStorage.setItem("selectedGenres", JSON.stringify(defaults));
         }
-        setSelectedGenres(selected);
         // Initially, fetch filtered movies using the current (or default) filters.
-        updateFilteredMovies(activeServices, selected, minRating, maxRating, sortOption);
+        updateFilteredMovies();
       })
       .catch(err => console.error('Error fetching movies:', err));
-  }, []); // run only once
+  }, []); // run once on mount
 
   /**
    * Calls the backend filtering endpoint with the current filter state.
-   * This function is called only when the user clicks "Update Filters."
+   * This function is called only when the user clicks "Update".
    */
-  const updateFilteredMovies = (active = activeServices, selected = selectedGenres, min = minRating, max = maxRating, sort = sortOption) => {
-    const svcActive = Object.entries(active)
+  const updateFilteredMovies = () => {
+    const svcActive = Object.entries(activeServices)
       .filter(([_, isActive]) => isActive)
       .map(([svc]) => svc)
       .join(',');
-    const genreActive = Object.entries(selected)
+    const genreActive = Object.entries(selectedGenres)
       .filter(([_, isActive]) => isActive)
       .map(([genre]) => genre)
       .join(',');
     const params = new URLSearchParams({
-      sort: sort,
-      min: min,
-      max: max,
+      sort: sortOption,
+      min: minRating,
+      max: maxRating,
       services: svcActive,
       genres: genreActive
     });
-    // Update the URL.
-    setSearchParams(params);
+    // Save current filters to localStorage.
+    localStorage.setItem("sortOption", sortOption);
+    localStorage.setItem("minRating", minRating);
+    localStorage.setItem("maxRating", maxRating);
+    localStorage.setItem("activeServices", JSON.stringify(activeServices));
+    localStorage.setItem("selectedGenres", JSON.stringify(selectedGenres));
+
     // Fetch filtered movies from the backend.
     fetch(`/api/movies/filtered?${params.toString()}`)
       .then(res => res.json())
@@ -178,31 +189,29 @@ function HomePage() {
       sortedMovies.sort((a, b) => b.popularity - a.popularity);
     }
     setFilteredMovies(sortedMovies);
-    // Also update URL with the new sort option.
-    setSearchParams(prev => {
-      prev.set('sort', sortOption);
-      return prev;
-    });
-  }, [sortOption]); // triggers instantly on sort option change
+    localStorage.setItem("sortOption", sortOption);
+  }, [sortOption]); // trigger immediately on sort option change
 
   /**
    * Toggle a streaming service.
    */
   const handleServiceToggle = (service) => {
-    setActiveServices(prev => ({
-      ...prev,
-      [service]: !prev[service]
-    }));
+    setActiveServices(prev => {
+      const newState = { ...prev, [service]: !prev[service] };
+      localStorage.setItem("activeServices", JSON.stringify(newState));
+      return newState;
+    });
   };
 
   /**
    * Toggle a genre.
    */
   const handleGenreToggle = (genre) => {
-    setSelectedGenres(prev => ({
-      ...prev,
-      [genre]: !prev[genre]
-    }));
+    setSelectedGenres(prev => {
+      const newState = { ...prev, [genre]: !prev[genre] };
+      localStorage.setItem("selectedGenres", JSON.stringify(newState));
+      return newState;
+    });
   };
 
   /**
@@ -210,10 +219,9 @@ function HomePage() {
    */
   const clearStreamingServices = () => {
     const cleared = {};
-    streamingServices.forEach(svc => {
-      cleared[svc] = false;
-    });
+    streamingServices.forEach(svc => { cleared[svc] = false; });
     setActiveServices(cleared);
+    localStorage.setItem("activeServices", JSON.stringify(cleared));
   };
 
   /**
@@ -221,33 +229,18 @@ function HomePage() {
    */
   const clearGenres = () => {
     const cleared = {};
-    genres.forEach(g => {
-      cleared[g] = false;
-    });
+    genres.forEach(g => { cleared[g] = false; });
     setSelectedGenres(cleared);
+    localStorage.setItem("selectedGenres", JSON.stringify(cleared));
   };
 
   /**
-   * Renders active filters as a stack of tags.
+   * Renders a message showing the number of filtered movies.
    */
-  const renderActiveFilters = () => {
-    const activeServiceFilters = Object.entries(activeServices)
-      .filter(([_, isActive]) => isActive)
-      .map(([svc]) => svc);
-    const activeGenreFilters = Object.entries(selectedGenres)
-      .filter(([_, isActive]) => isActive)
-      .map(([genre]) => genre);
+  const renderResultsMessage = () => {
     return (
-      <div className="active-filters">
-        {activeServiceFilters.map(filter => (
-          <span key={`svc-${filter}`} className="filter-tag">{filter}</span>
-        ))}
-        {activeGenreFilters.map(filter => (
-          <span key={`genre-${filter}`} className="filter-tag">{filter}</span>
-        ))}
-        <span className="filter-tag">
-          Rating: {minRating.toFixed(1)} — {maxRating.toFixed(1)}
-        </span>
+      <div className="results-message">
+        {filteredMovies.length} results found
       </div>
     );
   };
@@ -261,14 +254,14 @@ function HomePage() {
         </div>
         <div className="header-right">
           <div className="sort-options">
-            <label>Sort by: </label>
+            <label>sort by: </label>
             <select
               value={sortOption}
               onChange={e => setSortOption(e.target.value)}
             >
-              <option value="alphabetical">A to Z</option>
-              <option value="rating">By Rating</option>
-              <option value="popularity">By Popularity</option>
+              <option value="alphabetical">alphabetical</option>
+              <option value="rating">rating</option>
+              <option value="popularity">popularity</option>
             </select>
           </div>
           <div className="search-bar">search</div>
@@ -318,13 +311,13 @@ function HomePage() {
           />
 
           {/* Update Filters Button */}
-          <button onClick={() => updateFilteredMovies()}>update</button>
+          <button onClick={updateFilteredMovies}>update</button>
         </nav>
 
         {/* Catalog (right column) */}
         <main className="catalog">
           <h3>Movies</h3>
-          {renderActiveFilters()}
+          {renderResultsMessage()}
           <ul>
             {filteredMovies.map(movie => (
               <li key={movie.id}>

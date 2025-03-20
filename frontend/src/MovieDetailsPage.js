@@ -43,7 +43,7 @@ function MovieDetailsPage() {
 
   return (
     <div className="movie-details">
-      <Link to="/">← Back to Catalog</Link>
+      <Link to="/">← back</Link>
       <h1>{movie.title}</h1>
 
       {/* Format the streaming services array */}
