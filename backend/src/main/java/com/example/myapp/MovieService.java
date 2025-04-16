@@ -144,4 +144,85 @@ public class MovieService {
         }
         return movies;
     }
+
+    /**
+     * Filters and ranks movies based on a search query.
+     * The search covers title, keywords, studio, director, and cast.
+     * Weights:
+     *   - Title: 10 points per match
+     *   - Keywords: 5 points per match
+     *   - Director: 8 points per match
+     *   - Cast: 8 points per match
+     *   - Studio: 3 points per match
+     *
+     * @param query The search query string.
+     * @return A list of the top 25 most relevant movies.
+     */
+    public List<Movie> searchMovies(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return List.of();
+        }
+        // Split the query into tokens.
+        String[] tokens = query.toLowerCase().split("\\s+");
+        // Compute relevance score for each movie.
+        List<Movie> scored = movies.stream().map(movie -> {
+            double score = 0;
+            String title = movie.getTitle() != null ? movie.getTitle().toLowerCase() : "";
+            String overview = movie.getOverview() != null ? movie.getOverview().toLowerCase() : "";
+
+            // Weight Title: check if the full query is contained, plus each token.
+            if (title.contains(query.toLowerCase())) {
+                score += 20;
+            }
+            for (String token : tokens) {
+                if (title.contains(token)) {
+                    score += 10;
+                }
+                // Keywords (if any)
+                if (movie.getKeywords() != null) {
+                    for (String keyword : movie.getKeywords()) {
+                        if (keyword.toLowerCase().contains(token)) {
+                            score += 5;
+                        }
+                    }
+                }
+                // Director
+                if (movie.getDirector() != null) {
+                    for (String director : movie.getDirector()) {
+                        if (director.toLowerCase().contains(token)) {
+                            score += 8;
+                        }
+                    }
+                }
+                // Cast
+                if (movie.getCast() != null) {
+                    for (String castMember : movie.getCast()) {
+                        if (castMember.toLowerCase().contains(token)) {
+                            score += 8;
+                        }
+                    }
+                }
+                // Studio
+                if (movie.getStudio() != null) {
+                    for (String studio : movie.getStudio()) {
+                        if (studio.toLowerCase().contains(token)) {
+                            score += 3;
+                        }
+                    }
+                }
+                // Overview
+                if (overview.contains(token)) {
+                    score += 1;
+                }
+            }
+            movie.setRelevanceScore(score);
+            return movie;
+        })
+        .filter(movie -> movie.getRelevanceScore() > 0) // Only include movies with some relevance.
+        .sorted(Comparator.comparingDouble(Movie::getRelevanceScore).reversed())
+        .limit(25)
+        .collect(Collectors.toList());
+
+        return scored;
+    }
 }

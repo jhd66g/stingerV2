@@ -79,4 +79,15 @@
     ) {
         return movieService.getFilteredMovies(services, genres, min, max, sort);
     }
+
+    /**
+     * Endpoint to retrieve movies based on a search query.
+     * 
+     * @param query The search query string.
+     * @return A list of the 25 most relevant movies.
+     */
+    @GetMapping("/api/movies/search")
+    public List<Movie> searchMovies(@RequestParam("q") String query) {
+        return movieService.searchMovies(query);
+    }
  }

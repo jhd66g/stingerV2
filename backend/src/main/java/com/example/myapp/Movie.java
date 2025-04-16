@@ -28,6 +28,9 @@ public class Movie {
     private List<String> studio;
     private List<String> streaming_services;
 
+    // Transient relevance score used only for search ranking.
+    private transient double relevanceScore;
+
     /**
      * Returns the movie ID.
      * @return movie ID.
@@ -268,4 +271,18 @@ public class Movie {
     public void setStreaming_services(List<String> streaming_services) { 
         this.streaming_services = streaming_services; 
     }
+
+    /**
+     * Returns the relevance score
+     * @return relevance score
+     */
+    public double getRelevanceScore() { 
+        return relevanceScore; 
+    }
+
+    /**
+     * Sets the relevance score.
+     * @param relevanceScore relevance score
+     */
+    public void setRelevanceScore(double relevanceScore) { this.relevanceScore = relevanceScore; }
 }

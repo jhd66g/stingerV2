@@ -60,14 +60,18 @@ function RatingSlider({ minRating, maxRating, setMinRating, setMaxRating }) {
 
 /**
  * HomePage component:
- * - On mount, fetches streaming services and movies (for genres) once.
+ * - On mount, fetches streaming services and movies (for deriving genres) once.
  * - Initializes filter state (active streaming services, selected genres, rating range, sort option)
  *   from localStorage if available; otherwise, uses defaults.
- * - The "Update" button calls the backend filtering endpoint with the current filter state.
+ * - Provides clear buttons and an "update" button that calls the backend filtering endpoint.
  * - Changing the sort option immediately re-sorts the displayed movies.
- * - Clear buttons allow unchecking all streaming service or genre filters.
+ * - Persists filter state in localStorage so that it remains when returning from a movie's details page.
+ * - The header includes a search box that navigates to the search results page.
  */
 function HomePage() {
+  // Remove navigate since we won't use it here.
+  // const navigate = useNavigate();
+
   // Streaming services state
   const [streamingServices, setStreamingServices] = useState([]);
   const [activeServices, setActiveServices] = useState(() => {
@@ -101,7 +105,10 @@ function HomePage() {
     return stored || "alphabetical";
   });
 
-  // On mount, fetch streaming services and movies (for deriving genres).
+  // Search input state for header search (if used for navigation).
+  const [searchInput, setSearchInput] = useState("");
+
+  // On mount, fetch streaming services and movies (for deriving genres) only once.
   useEffect(() => {
     // Fetch streaming services.
     fetch('/api/streaming-services')
@@ -109,7 +116,6 @@ function HomePage() {
       .then(data => {
         const sortedServices = data.sort((a, b) => a.localeCompare(b));
         setStreamingServices(sortedServices);
-        // If localStorage for activeServices is empty, default all to true.
         if (Object.keys(activeServices).length === 0) {
           const defaults = {};
           sortedServices.forEach(svc => { defaults[svc] = true; });
@@ -129,7 +135,6 @@ function HomePage() {
         });
         const genreArr = Array.from(genreSet).sort((a, b) => a.localeCompare(b));
         setGenres(genreArr);
-        // If localStorage for selectedGenres is empty, default all to true.
         if (Object.keys(selectedGenres).length === 0) {
           const defaults = {};
           genreArr.forEach(g => { defaults[g] = true; });
@@ -140,11 +145,12 @@ function HomePage() {
         updateFilteredMovies();
       })
       .catch(err => console.error('Error fetching movies:', err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // run once on mount
 
   /**
    * Calls the backend filtering endpoint with the current filter state.
-   * This function is called only when the user clicks "Update".
+   * Called when the user clicks "update."
    */
   const updateFilteredMovies = () => {
     const svcActive = Object.entries(activeServices)
@@ -162,14 +168,14 @@ function HomePage() {
       services: svcActive,
       genres: genreActive
     });
-    // Save current filters to localStorage.
+    // Save filters to localStorage.
     localStorage.setItem("sortOption", sortOption);
     localStorage.setItem("minRating", minRating);
     localStorage.setItem("maxRating", maxRating);
     localStorage.setItem("activeServices", JSON.stringify(activeServices));
     localStorage.setItem("selectedGenres", JSON.stringify(selectedGenres));
 
-    // Fetch filtered movies from the backend.
+    // Fetch the filtered movies from the backend.
     fetch(`/api/movies/filtered?${params.toString()}`)
       .then(res => res.json())
       .then(data => setFilteredMovies(data))
@@ -177,7 +183,7 @@ function HomePage() {
   };
 
   /**
-   * When the sort option changes, sort the currently displayed movies immediately.
+   * When the sort option changes, re-sort the currently displayed movies immediately.
    */
   useEffect(() => {
     const sortedMovies = [...filteredMovies];
@@ -190,7 +196,8 @@ function HomePage() {
     }
     setFilteredMovies(sortedMovies);
     localStorage.setItem("sortOption", sortOption);
-  }, [sortOption]); // trigger immediately on sort option change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortOption]);
 
   /**
    * Toggle a streaming service.
@@ -245,6 +252,14 @@ function HomePage() {
     );
   };
 
+  /**
+   * Handles search submission from the header search box.
+   */
+  const handleSearch = () => {
+    // Navigate to the search results page.
+    window.location.href = `/search?q=${encodeURIComponent(searchInput)}`;
+  };
+
   return (
     <div className="homepage-container">
       {/* Header */}
@@ -264,7 +279,15 @@ function HomePage() {
               <option value="popularity">popularity</option>
             </select>
           </div>
-          <div className="search-bar">search</div>
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Search movies..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+            <button onClick={handleSearch}>Search</button>
+          </div>
         </div>
       </header>
 
