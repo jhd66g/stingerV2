@@ -36,7 +36,9 @@ function SearchResultsPage() {
   return (
     <div className="search-results-page">
       <header className="search-header">
-        <Link to="/">← Back to Catalog</Link>
+      <button className="btn-back" onClick={() => navigate(-1)}>
+        ← back
+      </button>
         <div className="search-bar-container">
           <input 
             type="text"

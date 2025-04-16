@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import './MovieDetailsPage.css';
 
 /**
@@ -27,6 +27,7 @@ function formatStreamingServices(services) {
  * overview, release date, runtime, and vote_average.
  */
 function MovieDetailsPage() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
 
@@ -43,7 +44,9 @@ function MovieDetailsPage() {
 
   return (
     <div className="movie-details">
-      <Link to="/">← back</Link>
+      <button className="btn-back" onClick={() => navigate(-1)}>
+        ← back
+      </button>
       <h1>{movie.title}</h1>
 
       {/* Format the streaming services array */}
