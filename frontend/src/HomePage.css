@@ -1,9 +1,15 @@
 /* ont and background for the entire app */
 :root {
-  --outline-color: #e0e0e0;
+  --outline-color: #ececec;
   --primary-bg:    #272727;
-  --text-color:    #e0e0e0;
-  --special-text-color:    #007bff;
+  --text-color:    #ececec;
+  --text-color2:    #007bff;
+  --text-color3:    #272727;
+  --accent: #ececec;
+  --accent2: #007bff;
+  --input-height: 2rem;              /* match your search‑input size */
+  --input-vertical-padding: 0.25rem; /* top/bottom padding */
+  --input-horizontal-padding: 0.75rem; /* left/right padding */
 }
 
 body {
@@ -28,7 +34,7 @@ body {
 
 /* movie links */
 .homepage-container a {
-  color: var(--special-text-color);
+  color: var(--text-color2);
   text-decoration: none;
 }
 .homepage-container a:hover {
@@ -59,12 +65,6 @@ body {
     gap: 1rem;
   }
   
-  .search-bar {
-    /* Just a placeholder, style as you wish */
-    border: 1px solid var(--outline-color);
-    padding: 0.25rem 0.5rem;
-  }
-  
   .homepage-body {
     display: flex; /* Two columns: sidebar + catalog */
     flex: 1;
@@ -91,31 +91,43 @@ body {
     margin-bottom: 2rem;
   }
 
-  /* --- reusable search bar --- */
+  /* --- reusable search bar container (already exists) --- */
 .search-bar-container {
   display: flex;
   gap: 0.5rem;
 }
-.search-bar-container input[type="text"] {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
+
+/* --- style the input itself via its own class --- */
+.search-input {
+  flex: 1;                      /* take remaining space */
+  padding: var(--input-vertical-padding) var(--input-horizontal-padding);
+  font-size: 1rem;
+  border: 1px solid var(--accent);
   border-radius: 4px;
-  width: 200px;
+  background: var(--accent);
+  color: var(--text-color3);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--accent2);
+  box-shadow: 0 0 0 2px var(--accent2);
 }
 
 /* --- reusable button --- */
 .btn {
-  padding: 0.5rem 1rem;
+  padding: var(--input-vertical-padding) var(--input-horizontal-padding);
   border: none;
   background-color: var(--accent);
-  color: #fff;
+  color: var(--accent2);
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
   transition: background 0.2s;
 }
 .btn:hover {
-  background-color: var(--accent-hover);
+  background-color: var(--accent2);
 }
 
 /* optional modifier for back buttons */
@@ -126,4 +138,52 @@ body {
 }
 .btn-back:hover {
   background-color: var(--outline-color);
+}
+
+/* SORT DROPDOWN (always reads “sort by ▼” until clicked) */
+.sort-dropdown {
+  position: relative;
+  display: inline-block;
+  height: var(--input-height);
+  margin-right: .5rem;
+  /* shrink-​wrap to placeholder text */
+  width: auto;
+  box-sizing: border-box;
+}
+
+/* the native <select> made invisible except for click area */
+.sort-select {
+  appearance: none;
+  width: 100%;
+  height: 100%;
+  padding: 0 var(--input-horizontal-padding);  /* only horizontal padding */
+  border: 0px solid var(--accent);
+  border-radius: 4px;
+  background: transparent;
+  color: transparent;                      /* hide its own text */
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+/* our custom label + arrow overlay */
+.sort-dropdown::after {
+  content: var(--sort-placeholder, 'sort by') ' ' var(--sort-arrow, '▼');
+  position: absolute;
+  top: 50%;
+  left: var(--input-horizontal-padding);
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--text-color);
+}
+
+/* options styling */
+.sort-select option {
+  color: var(--primary-bg);
+}
+
+/* hide IE/Edge icon */
+.sort-select::-ms-expand {
+  display: none;
 }

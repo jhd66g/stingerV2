@@ -209,23 +209,31 @@ function HomePage() {
       <header className="homepage-header">
         <div className="header-left"><h1>Stinger</h1></div>
         <div className="header-right">
-          <div className="sort-options">
-            <label>sort by:</label>
-            <select value={sortOption} onChange={e=>setSortOption(e.target.value)}>
-              <option value="alphabetical">alphabetical</option>
-              <option value="rating">rating</option>
-              <option value="popularity">popularity</option>
-            </select>
-          </div>
+        <div className="sort-dropdown">
+          <select
+            className="sort-select"
+            value={sortOption}
+            onChange={e => setSortOption(e.target.value)}
+          >
+            <option value="alphabetical">a to z</option>
+            <option value="rating">rating</option>
+            <option value="popularity">popularity</option>
+          </select>
+        </div>
           <div className="search-bar-container">
-            <input
-              type="text"
-              placeholder="Search movies..."
-              value={searchInput}
-              onChange={e => setSearchInput(e.target.value)}
-            />
-            <button className="btn" onClick={handleSearch}>Search</button>
-          </div>
+          <input
+            type="text"
+            className="search-input"
+            placeholder="search movies ..."
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                handleSearch();
+              }
+            }}
+          />
+        </div>
         </div>
       </header>
 
@@ -243,7 +251,9 @@ function HomePage() {
               </label>
             </div>
           ))}
-          <button onClick={clearStreamingServices}>clear</button>
+          <button className="btn" onClick={clearStreamingServices}>
+            clear
+          </button>
 
           <h4>Genre</h4>
           {genres.map(g=> (
@@ -257,7 +267,9 @@ function HomePage() {
               </label>
             </div>
           ))}
-          <button onClick={clearGenres}>clear</button>
+          <button className="btn" onClick={clearGenres}>
+            clear
+          </button>
 
           <RatingSlider
             minRating={minRating}
@@ -266,7 +278,9 @@ function HomePage() {
             setMaxRating={setMaxRating}
           />
 
-          <button onClick={updateFilteredMovies}>update</button>
+         <button className="btn" onClick={updateFilteredMovies}>
+          update
+         </button>
         </nav>
 
         <main className="catalog">

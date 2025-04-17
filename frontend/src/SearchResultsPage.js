@@ -2,22 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './SearchResultsPage.css';
 
-/**
- * Custom hook to extract the "q" parameter from the URL.
- */
+/** grab the “q” param from the URL */
 function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
 
-/**
- * SearchResultsPage displays the search results based on the query.
- */
 function SearchResultsPage() {
   const navigate = useNavigate();
   const query = useQuery();
   const searchQuery = query.get("q") || "";
+
+  // rename state to match your inputs
   const [movies, setMovies] = useState([]);
-  const [input, setInput] = useState(searchQuery);
+  const [searchInput, setSearchInput] = useState(searchQuery);
 
   useEffect(() => {
     if (searchQuery) {
@@ -29,29 +26,33 @@ function SearchResultsPage() {
   }, [searchQuery]);
 
   const handleSearch = () => {
-    // Navigate to the same page with the new query parameter.
-    navigate(`/search?q=${encodeURIComponent(input)}`);
+    navigate(`/search?q=${encodeURIComponent(searchInput)}`);
   };
 
   return (
     <div className="search-results-page">
       <header className="search-header">
-      <button className="btn-back" onClick={() => navigate(-1)}>
-        ← back
-      </button>
+        <button className="btn-back" onClick={() => navigate('/')}>
+          ← back
+        </button>
         <div className="search-bar-container">
-          <input 
+          <input
             type="text"
-            placeholder="Search movies..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
+            className="search-input"
+            placeholder="search movies…"
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter') handleSearch();
+            }}
           />
-          <button onClick={handleSearch}>Search</button>
         </div>
       </header>
-      <h2>Search Results for "{searchQuery}"</h2>
+
+      <h2>Search Results for “{searchQuery}”</h2>
+
       {movies.length === 0 ? (
-        <p>No matching movies found.</p>
+        <p>No matching movies found :(</p>
       ) : (
         <ul className="results-list">
           {movies.map(movie => (
