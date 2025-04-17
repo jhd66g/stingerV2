@@ -1,62 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Range } from 'react-range';
+import RatingSlider from './RatingSlider';
 import './HomePage.css';
-
-/**
- * Renders a double-ended slider for rating range (0–10) using react-range.
- */
-function RatingSlider({ minRating, maxRating, setMinRating, setMaxRating }) {
-  const STEP = 0.1;
-  const MIN = 0;
-  const MAX = 10;
-  const values = [minRating, maxRating];
-
-  const handleChange = (newValues) => {
-    setMinRating(newValues[0]);
-    setMaxRating(newValues[1]);
-  };
-
-  return (
-    <div style={{ margin: '1rem 0' }}>
-      <label style={{ display: 'block', marginBottom: '0.5rem' }}>
-        Rating: {minRating.toFixed(1)} — {maxRating.toFixed(1)}
-      </label>
-      <Range
-        step={STEP}
-        min={MIN}
-        max={MAX}
-        values={values}
-        onChange={handleChange}
-        renderTrack={({ props, children }) => (
-          <div
-            {...props}
-            style={{
-              height: '6px',
-              background: '#ccc',
-              margin: '1rem 0',
-              position: 'relative'
-            }}
-          >
-            {children}
-          </div>
-        )}
-        renderThumb={({ props }) => (
-          <div
-            {...props}
-            style={{
-              height: '20px',
-              width: '20px',
-              backgroundColor: '#999',
-              borderRadius: '50%',
-              boxShadow: '0 0 2px #666'
-            }}
-          />
-        )}
-      />
-    </div>
-  );
-}
 
 /**
  * HomePage component:
@@ -66,6 +11,11 @@ function RatingSlider({ minRating, maxRating, setMinRating, setMaxRating }) {
  */
 function HomePage() {
   // Streaming services state
+  // state of Streaming Service and Genre
+  const [showServices, setShowServices] = useState(true);
+  const [showGenres,  setShowGenres]  = useState(true);
+
+
   const [streamingServices, setStreamingServices] = useState([]);
   const [activeServices, setActiveServices] = useState(() => {
     const stored = localStorage.getItem("activeServices");
@@ -238,39 +188,65 @@ function HomePage() {
       </header>
 
       <div className="homepage-body">
-        <nav className="sidebar">
-          <h4>Streaming Service</h4>
-          {streamingServices.map(svc=> (
+      <nav className="sidebar">
+      {/* SERVICES */}
+      <h4
+        className="sidebar-toggle"
+        onClick={() => setShowServices(s => !s)}
+      >
+        Streaming Service
+        <span className="toggle-arrow">{showServices ? '▲' : '▼'}</span>
+      </h4>
+      {showServices && (
+        <>
+          {streamingServices.map(svc => (
             <div key={svc}>
               <label>
                 <input
                   type="checkbox"
-                  checked={activeServices[svc]||false}
-                  onChange={()=>handleServiceToggle(svc)}
-                /> {svc}
+                  checked={activeServices[svc] || false}
+                  onChange={() => handleServiceToggle(svc)}
+                />
+                <span className="filter-pill">{svc}</span>
               </label>
             </div>
           ))}
           <button className="btn" onClick={clearStreamingServices}>
             clear
           </button>
+        </>
+      )}
 
-          <h4>Genre</h4>
-          {genres.map(g=> (
+      {/* GENRES */}
+      <h4
+        className="sidebar-toggle"
+        onClick={() => setShowGenres(s => !s)}
+      >
+        Genre
+        <span className="toggle-arrow">{showGenres ? '▲' : '▼'}</span>
+      </h4>
+      {showGenres && (
+        <>
+          {genres.map(g => (
             <div key={g}>
               <label>
                 <input
                   type="checkbox"
-                  checked={selectedGenres[g]||false}
-                  onChange={()=>handleGenreToggle(g)}
-                /> {g}
+                  checked={selectedGenres[g] || false}
+                  onChange={() => handleGenreToggle(g)}
+                />
+                <span className="filter-pill">{g}</span>
               </label>
             </div>
           ))}
           <button className="btn" onClick={clearGenres}>
             clear
           </button>
+        </>
+      )}
 
+      {/* RATING */}
+         <h4 className="sidebar-toggle">Rating</h4>
           <RatingSlider
             minRating={minRating}
             maxRating={maxRating}
