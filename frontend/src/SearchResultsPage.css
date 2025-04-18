@@ -12,6 +12,7 @@ body {
   width: 100%;
   min-height: 100vh;
   padding: 1.5rem;
+  padding-top: 1rem;
   margin: 0 auto;
   box-sizing: border-box;
 }
@@ -19,10 +20,19 @@ body {
 /* — Header with back button + search bar — */
 .search-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  /* switch to flex‑start so items stack from the left, then push the search bar */
+  justify-content: flex-start;
   margin-bottom: 1rem;
   flex: 0 0 auto;
+}
+
+/* push the search bar to the far right */
+.search-bar-container {
+  padding-top: 0rem;
+  margin-left: auto;
+  display: flex;     /* keep your existing layout */
+  gap: 0.5rem;
 }
 
 .btn-back {
@@ -37,12 +47,6 @@ body {
 
 .btn-back:hover {
   background-color: var(--outline-color);
-}
-
-/* — Search input styles (reused from homepage.css) — */
-.search-bar-container {
-  display: flex;
-  gap: 0.5rem;
 }
 
 .search-input {
@@ -67,6 +71,15 @@ body {
 .search-results-page h2 {
   margin: 0 0 1rem;
   font-family: var(--font-special);
+}
+
+.search-results-page a,
+.search-results-page a:visited,
+.search-results-page a:hover,
+.search-results-page a:active,
+.search-results-page a:focus {
+  color: var(--text-color2) !important;
+  text-decoration: none !important;
 }
 
 /* — Scrollable area containing the grid — */

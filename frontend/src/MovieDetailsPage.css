@@ -13,6 +13,10 @@
 
 /* Back button */
 .btn-back {
+  position: absolute;
+  top: 1rem;                /* position from top of container */
+  left: 1rem;               /* position from left edge */
+  margin: 0;                /* remove any bottom margin */
   display: inline-block;
   margin-bottom: 1rem;
   padding: var(--input-vertical-padding) var(--input-horizontal-padding);
@@ -29,7 +33,8 @@
 
 /* Title */
 .movie-title-header {
-  margin: 1rem 0;
+  margin-top: 0rem;      /* very snug under the back button */
+  margin-bottom: 1rem;
   font-family: var(--font-special);
   font-size: 2rem;
 }

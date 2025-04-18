@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import RatingSlider from './RatingSlider';
 import PosterFallback from './PosterFallback';
 import './HomePage.css';
@@ -11,6 +11,9 @@ import './HomePage.css';
  * - Header includes search box styled like SearchResultsPage
  */
 function HomePage() {
+  // navigation
+  const navigate = useNavigate();
+
   // sidebar collapsability
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -155,7 +158,9 @@ function HomePage() {
   );
 
   const handleSearch = () => {
-    window.location.href = `/search?q=${encodeURIComponent(searchInput)}`;
+    const q = searchInput.trim();
+    if (!q) return;                   // do nothing on empty
+      navigate(`/search?q=${encodeURIComponent(q)}`);
   };
 
   return (

@@ -42,7 +42,7 @@ export default function MovieDetailsPage() {
 
   return (
     <div className="movie-details">
-      <button className="btn-back" onClick={() => navigate('/')}>
+      <button className="btn-back" onClick={() => navigate(-1)}>
         ← back
       </button>
 

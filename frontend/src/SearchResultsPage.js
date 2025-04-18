@@ -1,39 +1,46 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import './HomePage.css';          // <-- grid + cards
-import './SearchResultsPage.css'; // <-- header, overall page
-
-function useQuery() {
-  return new URLSearchParams(useLocation().search);
-}
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import './HomePage.css';
+import './SearchResultsPage.css';
 
 export default function SearchResultsPage() {
   const navigate = useNavigate();
-  const query = useQuery();
-  const searchQuery = query.get("q") || "";
+  const location = useLocation();
 
-  const [movies, setMovies] = useState([]);
-  const [searchInput, setSearchInput] = useState(searchQuery);
+  // 1) seed from ?q=
+  const initQ = new URLSearchParams(location.search).get('q') || '';
+  const [searchInput, setSearchInput] = useState(initQ);
+  const [movies, setMovies]         = useState([]);
 
+  // 2) whenever searchInput changes, debounce + fetch + update URL (replace)
   useEffect(() => {
-    if (searchQuery) {
-      fetch(`/api/movies/search?q=${encodeURIComponent(searchQuery)}`)
-        .then(res => res.json())
+    const q = searchInput.trim();
+    if (!q) {
+      setMovies([]);
+      navigate(`/search`, { replace: true });
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      fetch(`/api/movies/search?q=${encodeURIComponent(q)}`)
+        .then(r => r.json())
         .then(setMovies)
         .catch(console.error);
-    }
-  }, [searchQuery]);
+      navigate(`/search?q=${encodeURIComponent(q)}`, { replace: true });
+    }, 250);
 
-  const handleSearch = () =>
-    navigate(`/search?q=${encodeURIComponent(searchInput)}`);
+    return () => clearTimeout(timer);
+  }, [searchInput, navigate]);
 
   return (
     <div className="search-results-page">
       <header className="search-header">
         <button
           className="btn-back"
-          onClick={() => navigate('/')}
-        >← back</button>
+          onClick={() => navigate('/')}      /* go back to home or previous page */
+        >
+          ← back
+        </button>
         <div className="search-bar-container">
           <input
             type="text"
@@ -41,12 +48,11 @@ export default function SearchResultsPage() {
             placeholder="search movies…"
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSearch()}
           />
         </div>
       </header>
 
-      <h2>Search Results for “{searchQuery}”</h2>
+      <h2>Search Results for “{searchInput}”</h2>
 
       {movies.length === 0 ? (
         <p>No matching movies found :(</p>
@@ -68,9 +74,7 @@ export default function SearchResultsPage() {
                   }}
                 />
               </div>
-              <div className="movie-title">
-                {movie.title}
-              </div>
+              <div className="movie-title">{movie.title}</div>
             </Link>
           ))}
         </div>
