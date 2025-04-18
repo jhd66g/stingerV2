@@ -53,7 +53,6 @@ export default function MovieDetailsPage() {
       <p><strong>Studio:</strong> {movie.studio.join(', ')}</p>
       <p><strong>Director:</strong> {movie.director.join(', ')}</p>
       <p><strong>Cast:</strong> {movie.cast.join(', ')}</p>
-      <p className="overview">{movie.overview}</p>
       <div className="trailer-container">
         {videoId ? (
           <iframe
@@ -66,6 +65,7 @@ export default function MovieDetailsPage() {
           <p className="no-trailer">No trailer available.</p>
         )}
       </div>
+      <p className="overview">{movie.overview}</p>
       <p><strong>Release date:</strong> {movie.release_date}</p>
       <p><strong>Runtime:</strong> {movie.runtime} minutes</p>
       <p><strong>Rating:</strong> {movie.vote_average}</p>
