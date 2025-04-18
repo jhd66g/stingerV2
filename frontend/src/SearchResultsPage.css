@@ -1,39 +1,126 @@
 /* SearchResultsPage.css */
 
+/* — Allow the page (and body) to scroll again — */
+body {
+  overflow: auto;
+}
+
+/* — Page container spans full viewport and lays out header + results — */
 .search-results-page {
-    font-family: Arial, sans-serif;
-    padding: 1rem;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  
-  .search-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-  
-  .search-header a {
-    text-decoration: none;
-    color: #007bff;
-  }
-  
-  .results-list {
-    list-style: none;
-    padding: 0;
-    margin-top: 1rem;
-  }
-  
-  .results-list li {
-    margin-bottom: 0.5rem;
-  }
-  
-  .results-list li a {
-    text-decoration: none;
-    color: #007bff;
-  }
-  
-  .results-list li a:hover {
-    text-decoration: underline;
-  }
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  padding: 1.5rem;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* — Header with back button + search bar — */
+.search-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex: 0 0 auto;
+}
+
+.btn-back {
+  background: transparent;
+  color: var(--text-color);
+  border: none;
+  padding: var(--input-vertical-padding) var(--input-horizontal-padding);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.btn-back:hover {
+  background-color: var(--outline-color);
+}
+
+/* — Search input styles (reused from homepage.css) — */
+.search-bar-container {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.search-input {
+  flex: 1;
+  padding: var(--input-vertical-padding) var(--input-horizontal-padding);
+  font-size: 1rem;
+  font-family: var(--font-normal);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--text-color3);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--accent2);
+  box-shadow: 0 0 0 2px var(--accent2);
+}
+
+/* — Title for results — */
+.search-results-page h2 {
+  margin: 0 0 1rem;
+  font-family: var(--font-special);
+}
+
+/* — Scrollable area containing the grid — */
+.results-container {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-left: 1rem;
+  padding-right: 1rem; /* account for scrollbar */
+  padding-bottom: 2rem;
+}
+
+/* — Movie grid (from homepage.css) — */
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+/* — Movie card styling (from homepage.css) — */
+.movie-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.movie-card:hover {
+  transform: scale(1.05);
+  z-index: 2;
+}
+
+/* — Poster container (from homepage.css) — */
+.poster-container {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--accent3);
+}
+
+.poster-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* — Movie title text (from homepage.css) — */
+.movie-title {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  line-height: 1.2;
+}

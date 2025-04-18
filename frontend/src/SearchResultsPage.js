@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import './SearchResultsPage.css';
+import './HomePage.css';          // <-- grid + cards
+import './SearchResultsPage.css'; // <-- header, overall page
 
-/** grab the “q” param from the URL */
 function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
 
-function SearchResultsPage() {
+export default function SearchResultsPage() {
   const navigate = useNavigate();
   const query = useQuery();
   const searchQuery = query.get("q") || "";
 
-  // rename state to match your inputs
   const [movies, setMovies] = useState([]);
   const [searchInput, setSearchInput] = useState(searchQuery);
 
@@ -20,21 +19,21 @@ function SearchResultsPage() {
     if (searchQuery) {
       fetch(`/api/movies/search?q=${encodeURIComponent(searchQuery)}`)
         .then(res => res.json())
-        .then(data => setMovies(data))
-        .catch(err => console.error('Error fetching search results:', err));
+        .then(setMovies)
+        .catch(console.error);
     }
   }, [searchQuery]);
 
-  const handleSearch = () => {
+  const handleSearch = () =>
     navigate(`/search?q=${encodeURIComponent(searchInput)}`);
-  };
 
   return (
     <div className="search-results-page">
       <header className="search-header">
-        <button className="btn-back" onClick={() => navigate('/')}>
-          ← back
-        </button>
+        <button
+          className="btn-back"
+          onClick={() => navigate('/')}
+        >← back</button>
         <div className="search-bar-container">
           <input
             type="text"
@@ -42,9 +41,7 @@ function SearchResultsPage() {
             placeholder="search movies…"
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter') handleSearch();
-            }}
+            onKeyDown={e => e.key === 'Enter' && handleSearch()}
           />
         </div>
       </header>
@@ -54,16 +51,30 @@ function SearchResultsPage() {
       {movies.length === 0 ? (
         <p>No matching movies found :(</p>
       ) : (
-        <ul className="results-list">
+        <div className="movie-grid">
           {movies.map(movie => (
-            <li key={movie.id}>
-              <Link to={`/movie/${movie.id}`}>{movie.title}</Link>
-            </li>
+            <Link
+              key={movie.id}
+              to={`/movie/${movie.id}`}
+              className="movie-card"
+            >
+              <div className="poster-container">
+                <img
+                  src={`https://image.tmdb.org/t/p/w342${movie.poster_path}`}
+                  alt={movie.title}
+                  onError={e => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = '/placeholder.png';
+                  }}
+                />
+              </div>
+              <div className="movie-title">
+                {movie.title}
+              </div>
+            </Link>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
 }
-
-export default SearchResultsPage;

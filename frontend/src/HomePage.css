@@ -40,7 +40,7 @@ body {
 .homepage-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 /*==============================================================================
@@ -74,7 +74,7 @@ body {
   display: flex;
   flex: 1;
   /* fixes inner panels to viewport minus header */
-  height: calc(100vh - var(--header-height));
+  min-height: calc(100vh - var(--header-height));
 }
 
 .catalog a,
@@ -92,6 +92,7 @@ body {
   padding-right: 1rem;
   padding-left: 1rem;
   padding-top: .5rem;
+  padding-bottom: .75rem;
   border-right: 0px solid var(--outline-color);
   overflow-y: auto;               /* still scroll this pane */
   transition: width 0.3s ease;
@@ -114,6 +115,7 @@ body {
   flex: 1;
   padding: 1rem;
   overflow-y: auto;
+  padding-bottom: 1.5rem;
 }
 
 /*==============================================================================
@@ -166,6 +168,61 @@ body {
 .search-input:focus {
   border-color: var(--accent2);
   box-shadow: 0 0 0 2px var(--accent2);
+}
+
+/*-----------------------
+ Movie grid layout
+------------------------*/
+.movie-grid {
+  display: grid;
+  /* 5 across at ~180px each, but will shrink/grow responsively */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  overflow: visible;
+}
+
+.movie-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease;
+  transform-origin: center center;
+  position: relative;  /* so z‑index works */
+  cursor: pointer;
+  z-index: 1;
+}
+
+.poster-container {
+  width: 100%;
+  aspect-ratio: 2 / 3;      /* lock to your “normal poster” ratio */
+  overflow: hidden;         /* crop anything hanging out */
+  border-radius: 4px;
+  background: var(--accent3); /* optional “loading” background */
+}
+
+/* fill that box and crop non‑matching images */
+.poster-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;        /* crop/zoom to fill exactly */
+  display: block;
+}
+
+.movie-title {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  line-height: 1.2;
+}
+
+.movie-card:hover {
+  transform: scale(1.05);
+  z-index: 2;  /* lift it above siblings */
+}
+
+.results-message {
+  padding-bottom: .5rem;    /* or whatever spacing you like */
 }
 
 /*==============================================================================
@@ -274,11 +331,16 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 0;    /* removed extra top gap */
-  padding: 0.5rem 0; 
+  /* remove the gap at the top */
+  margin: 0;
+  padding: 0.5rem 0;
   cursor: pointer;
   user-select: none;
   font-family: var(--font-special);
+  font-size: 1.1rem;       /* tweak as needed */
+  font-weight: bold;
+  letter-spacing: 0.02em;
+  color: var(--text-color);
 }
 
 .toggle-arrow {
@@ -290,6 +352,20 @@ body {
   transform: rotate(180deg);
 }
 
+.sidebar-section {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition:
+    max-height 0.4s ease,
+    opacity     0.3s ease 0.1s;
+}
+
+.sidebar-section.expanded {
+  max-height: 1000px; /* or large enough to fit */
+  opacity: 1;
+}
+
 /*==============================================================================
   Rating slider
 ==============================================================================*/
@@ -297,6 +373,8 @@ body {
 .rating-slider {
   margin: 1rem 0 1.5rem;
   padding-bottom: .25rem;
+  padding-left: .5rem;
+  padding-right: .65rem;
 }
 
 .rating-track {

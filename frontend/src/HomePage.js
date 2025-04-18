@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import RatingSlider from './RatingSlider';
+import PosterFallback from './PosterFallback';
 import './HomePage.css';
 
 /**
@@ -199,78 +200,72 @@ function HomePage() {
             />
       {/* SERVICES */}
       <h4
-        className="sidebar-toggle"
+        className={`sidebar-toggle ${showServices ? '' : 'collapsed'}`}
         onClick={() => setShowServices(s => !s)}
       >
         Streaming Service
-        <span className="toggle-arrow">{showServices ? '▲' : '▼'}</span>
+        <span className="toggle-arrow">▼</span>
       </h4>
-      {showServices && (
-        <>
-          {streamingServices.map(svc => (
-            <div key={svc}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={activeServices[svc] || false}
-                  onChange={() => handleServiceToggle(svc)}
-                />
-                <span className="filter-pill">{svc}</span>
-              </label>
-            </div>
-          ))}
-          <button className="btn" onClick={clearStreamingServices}>
-            clear
-          </button>
-        </>
-      )}
+      <div className={`sidebar-section ${showServices ? 'expanded' : ''}`}>
+        {streamingServices.map(svc => (
+          <div key={svc}>
+            <label>
+              <input
+                type="checkbox"
+                checked={activeServices[svc] || false}
+                onChange={() => handleServiceToggle(svc)}
+              />
+              <span className="filter-pill">{svc}</span>
+            </label>
+          </div>
+        ))}
+        <button className="btn" onClick={clearStreamingServices}>
+          clear
+        </button>
+      </div>
 
       {/* GENRES */}
       <h4
-        className="sidebar-toggle"
+        className={`sidebar-toggle ${showGenres ? '' : 'collapsed'}`}
         onClick={() => setShowGenres(s => !s)}
       >
         Genre
-        <span className="toggle-arrow">{showGenres ? '▲' : '▼'}</span>
+        <span className="toggle-arrow">▼</span>
       </h4>
-      {showGenres && (
-        <>
-          {genres.map(g => (
-            <div key={g}>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={selectedGenres[g] || false}
-                  onChange={() => handleGenreToggle(g)}
-                />
-                <span className="filter-pill">{g}</span>
-              </label>
-            </div>
-          ))}
-          <button className="btn" onClick={clearGenres}>
-            clear
-          </button>
-        </>
-      )}
+      <div className={`sidebar-section ${showGenres ? 'expanded' : ''}`}>
+        {genres.map(g => (
+          <div key={g}>
+            <label>
+              <input
+                type="checkbox"
+                checked={selectedGenres[g] || false}
+                onChange={() => handleGenreToggle(g)}
+              />
+              <span className="filter-pill">{g}</span>
+            </label>
+          </div>
+        ))}
+        <button className="btn" onClick={clearGenres}>
+          clear
+        </button>
+      </div>
 
       {/* RATING */}
       <h4
-        className="sidebar-toggle"
+        className={`sidebar-toggle ${showRating ? '' : 'collapsed'}`}
         onClick={() => setShowRating(r => !r)}
       >
         Rating
-        <span className="toggle-arrow">
-          {showRating ? '▲' : '▼'}
-        </span>
+        <span className="toggle-arrow">▼</span>
       </h4>
-      {showRating && (
+      <div className={`sidebar-section ${showRating ? 'expanded' : ''}`}>
         <RatingSlider
           minRating={minRating}
           maxRating={maxRating}
           setMinRating={setMinRating}
           setMaxRating={setMaxRating}
         />
-      )}
+      </div>
 
          <button className="btn" onClick={updateFilteredMovies}>
           update
@@ -279,11 +274,18 @@ function HomePage() {
 
         <main className="catalog">
           {renderResultsMessage()}
-          <div className="results-list">
-            {filteredMovies.map(movie=> (
-              <div key={movie.id} className="result-item">
-                <Link to={`/movie/${movie.id}`}>{movie.title}</Link>
-              </div>
+
+          <div className="movie-grid">
+            {filteredMovies.map(movie => (
+              <Link key={movie.id} to={`/movie/${movie.id}`} className="movie-card">
+                <div className="poster-container">
+                  <PosterFallback
+                    posterPath={movie.poster_path}
+                    alt={movie.title}
+                  />
+                </div>
+                <div className="movie-title">{movie.title}</div>
+              </Link>
             ))}
           </div>
         </main>
