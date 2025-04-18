@@ -1,21 +1,75 @@
-/* MovieDetailsPage.css */
+/*==============================================================================
+  Movie Details Page
+==============================================================================*/
 
 .movie-details {
-    max-width: 800px;
-    margin: 0 auto;
-    font-family: sans-serif;
-  }
-  
-  .movie-details h1 {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  .movie-details p {
-    margin: 0.5rem 0;
-  }
-  
-  .movie-details a {
-    display: inline-block;
-    margin-bottom: 1rem;
-  }
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+  font-family: var(--font);
+  color: var(--text-color);
+  overflow-y: auto;
+}
+
+/* Back button */
+.btn-back {
+  display: inline-block;
+  margin-bottom: 1rem;
+  padding: var(--input-vertical-padding) var(--input-horizontal-padding);
+  border: none;
+  border-radius: 999px;
+  background-color: transparent;
+  color: var(--text-color);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-back:hover {
+  background-color: var(--outline-color);
+}
+
+/* Title */
+.movie-title-header {
+  margin: 1rem 0;
+  font-family: var(--font-special);
+  font-size: 2rem;
+}
+
+/*==============================================================================
+  Trailer embed
+==============================================================================*/
+.trailer-container {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;    /* 16:9 aspect ratio (9/16 = 0.5625) */
+  margin: 1rem 0;          /* space above/below */
+}
+
+.trailer-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Text paragraphs */
+.movie-details p {
+  margin: 0.5rem 0;
+  line-height: 1.4;
+}
+
+/* Overview paragraph styling */
+.overview {
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+/* Link resets (if any links are added later) */
+.movie-details a {
+  color: var(--text-color2);
+  text-decoration: none;
+}
+.movie-details a:hover {
+  text-decoration: underline;
+}

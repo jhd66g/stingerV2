@@ -4,13 +4,6 @@ import './MovieDetailsPage.css';
 
 /**
  * Formats an array of streaming service names into a human-readable string.
- * For example:
- *  - [“Hulu”] => “Hulu”
- *  - [“Hulu”, “Netflix”] => “Hulu and Netflix”
- *  - [“Hulu”, “Netflix”, “Peacock Premium”] => “Hulu, Netflix, and Peacock Premium”
- *
- * @param {string[]} services - An array of streaming service names.
- * @returns {string} The formatted string.
  */
 function formatStreamingServices(services) {
   if (!services || services.length === 0) return "";
@@ -21,49 +14,61 @@ function formatStreamingServices(services) {
   return `${allButLast}, and ${last}`;
 }
 
-/**
- * MovieDetailsPage displays detailed information for a movie.
- * It shows the title, streaming services (formatted), genres, studio, director, cast,
- * overview, release date, runtime, and vote_average.
- */
-function MovieDetailsPage() {
+export default function MovieDetailsPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
+  const [videoId, setVideoId] = useState("");
 
+  // Fetch movie details and trailer
   useEffect(() => {
     fetch(`/api/movies/${id}`)
-      .then((res) => res.json())
-      .then((data) => setMovie(data))
-      .catch((err) => console.error('Error fetching movie details:', err));
-  }, [id]);
+      .then(res => res.json())
+      .then(data => setMovie(data))
+      .catch(err => console.error('Error fetching movie details:', err));
+
+    fetch(`/api/movies/${id}/trailer`)
+      .then(res => res.json())
+      .then(data => {
+        console.log("Trailer endpoint returned:", data);
+        setVideoId(data.videoId || "");
+      })
+      .catch(err => console.error('Error fetching trailer:', err));
+  }, [id]);  // ← ← ← Close your useEffect here
 
   if (!movie) {
-    return <div>Loading...</div>;
+    return <div className="movie-details">Loading…</div>;
   }
 
   return (
     <div className="movie-details">
-      <button className="btn-back" onClick={() => navigate(-1)}>
+      <button className="btn-back" onClick={() => navigate('/')}>
         ← back
       </button>
-      <h1>{movie.title}</h1>
 
-      {/* Format the streaming services array */}
-      <p>
-        Available on {formatStreamingServices(movie.streaming_services)}
-      </p>
+      <h1 className="movie-title-header">{movie.title}</h1>
 
-      <p>Genres: {movie.genres.join(', ')}</p>
-      <p>Studio: {movie.studio.join(', ')}</p>
-      <p>Director: {movie.director.join(', ')}</p>
-      <p>Cast: {movie.cast.join(', ')}</p>
-      <p>{movie.overview}</p>
-      <p>Release date: {movie.release_date}</p>
-      <p>Runtime: {movie.runtime} minutes</p>
-      <p>Rating: {movie.vote_average}</p>
+      <p><strong>Available on:</strong> {formatStreamingServices(movie.streaming_services)}</p>
+      <p><strong>Genres:</strong> {movie.genres.join(', ')}</p>
+      <p><strong>Studio:</strong> {movie.studio.join(', ')}</p>
+      <p><strong>Director:</strong> {movie.director.join(', ')}</p>
+      <p><strong>Cast:</strong> {movie.cast.join(', ')}</p>
+      <p className="overview">{movie.overview}</p>
+      <div className="trailer-container">
+        {videoId ? (
+          <iframe
+            title="Trailer"
+            src={`https://www.youtube.com/embed/${videoId}`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        ) : (
+          <p className="no-trailer">No trailer available.</p>
+        )}
+      </div>
+      <p><strong>Release date:</strong> {movie.release_date}</p>
+      <p><strong>Runtime:</strong> {movie.runtime} minutes</p>
+      <p><strong>Rating:</strong> {movie.vote_average}</p>
     </div>
   );
 }
-
-export default MovieDetailsPage;
