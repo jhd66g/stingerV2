@@ -10,12 +10,15 @@ import './HomePage.css';
  * - Header includes search box styled like SearchResultsPage
  */
 function HomePage() {
-  // Streaming services state
+  // sidebar collapsability
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
   // state of Streaming Service and Genre
   const [showServices, setShowServices] = useState(true);
   const [showGenres,  setShowGenres]  = useState(true);
+  const [showRating, setShowRating] = useState(true);
 
-
+  // Streaming services state
   const [streamingServices, setStreamingServices] = useState([]);
   const [activeServices, setActiveServices] = useState(() => {
     const stored = localStorage.getItem("activeServices");
@@ -188,7 +191,12 @@ function HomePage() {
       </header>
 
       <div className="homepage-body">
-      <nav className="sidebar">
+      <nav className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
+        <button
+              className="sidebar-collapse-btn"
+              onClick={() => setSidebarCollapsed(s => !s)}
+              aria-label={sidebarCollapsed ? 'Expand filters' : 'Collapse filters'}
+            />
       {/* SERVICES */}
       <h4
         className="sidebar-toggle"
@@ -246,13 +254,23 @@ function HomePage() {
       )}
 
       {/* RATING */}
-         <h4 className="sidebar-toggle">Rating</h4>
-          <RatingSlider
-            minRating={minRating}
-            maxRating={maxRating}
-            setMinRating={setMinRating}
-            setMaxRating={setMaxRating}
-          />
+      <h4
+        className="sidebar-toggle"
+        onClick={() => setShowRating(r => !r)}
+      >
+        Rating
+        <span className="toggle-arrow">
+          {showRating ? '▲' : '▼'}
+        </span>
+      </h4>
+      {showRating && (
+        <RatingSlider
+          minRating={minRating}
+          maxRating={maxRating}
+          setMinRating={setMinRating}
+          setMaxRating={setMaxRating}
+        />
+      )}
 
          <button className="btn" onClick={updateFilteredMovies}>
           update
