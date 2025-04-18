@@ -160,7 +160,7 @@ function HomePage() {
   return (
     <div className="homepage-container">
       <header className="homepage-header">
-        <div className="header-left"><h1>Stinger</h1></div>
+        <div className="header-left"><h1>STINGER</h1></div>
         <div className="header-right">
         <div className="sort-dropdown">
           <select
