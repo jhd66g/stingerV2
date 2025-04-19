@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './MovieDetailsPage.css';
+import { API } from './api';
 
 /**
  * Formats an array of streaming service names into a human-readable string.

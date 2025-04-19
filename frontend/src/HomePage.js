@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import RatingSlider from './RatingSlider';
 import PosterFallback from './PosterFallback';
 import './HomePage.css';
+import { API } from './api';
 
 /**
  * HomePage component:

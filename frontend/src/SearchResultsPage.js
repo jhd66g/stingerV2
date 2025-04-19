@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './HomePage.css';
 import './SearchResultsPage.css';
+import { API } from './api';
 
 export default function SearchResultsPage() {
   const navigate = useNavigate();
