@@ -14,6 +14,9 @@ function HomePage() {
   // navigation
   const navigate = useNavigate();
 
+  // sort collapseability
+  const [showSortOptions, setShowSortOptions] = useState(false);
+
   // sidebar collapsability
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -166,19 +169,38 @@ function HomePage() {
   return (
     <div className="homepage-container">
       <header className="homepage-header">
-        <div className="header-left"><h1>STINGER</h1></div>
-        <div className="header-right">
-        <div className="sort-dropdown">
-          <select
-            className="sort-select"
-            value={sortOption}
-            onChange={e => setSortOption(e.target.value)}
-          >
-            <option value="alphabetical">a to z</option>
-            <option value="rating">rating</option>
-            <option value="popularity">popularity</option>
-          </select>
+        <div className="header-left">
+            <h1>STINGER</h1>
         </div>
+        <div className="header-right">
+          <Link to="/about" className="btn-about">about</Link>
+          <div className={`sort-dropdown ${showSortOptions ? 'open' : ''}`}>
+            <span
+              className="sort-label"
+              onClick={() => setShowSortOptions(s => !s)}
+            >
+              sort by {sortOption} <span className="sort-arrow">▼</span>
+            </span>
+
+            <div className="sort-menu">
+              {[
+                { value: "alphabetical", label: "alphabetical" },
+                { value: "rating",       label: "rating" },
+                { value: "popularity",   label: "popularity" },
+              ].map(({value,label}) => (
+                <div
+                  key={value}
+                  className="sort-menu-item"
+                  onClick={() => {
+                    setSortOption(value);
+                    setShowSortOptions(false);
+                  }}
+                >
+                  {label}
+                </div>
+              ))}
+            </div>
+          </div>
           <div className="search-bar-container">
           <input
             type="text"

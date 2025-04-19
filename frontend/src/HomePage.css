@@ -64,7 +64,32 @@ body {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0rem;
+}
+
+/*==============================================================================
+  About
+==============================================================================*/
+/* make title + about button sit nicely */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.btn-about {
+  padding: var(--input-vertical-padding) var(--input-horizontal-padding);
+  border: none;
+  color: var(--text-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+  text-decoration: none;
+}
+
+.btn-about:hover {
+  color: var(--text-color2);
 }
 
 /*==============================================================================
@@ -214,7 +239,8 @@ body {
 .movie-title {
   margin-top: 0.5rem;
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  font-weight: bold;
   color: var(--text-color);
   line-height: 1.2;
 }
@@ -225,7 +251,7 @@ body {
 }
 
 .results-message {
-  padding-bottom: .5rem;    /* or whatever spacing you like */
+  padding-bottom: .75rem;    /* or whatever spacing you like */
 }
 
 /*==============================================================================
@@ -266,41 +292,79 @@ body {
   Sort dropdown
 ==============================================================================*/
 .sort-dropdown {
+  display: inline-flex;
+  align-items: center;               /* vertically center label+arrow */
   position: relative;
-  display: inline-block;
-  height: var(--input-height);
-  margin-right: .5rem;
-  width: auto;
+  cursor: pointer;
+  user-select: none;
+  padding: 0 var(--input-horizontal-padding);
+  height: var(--input-height);       /* same height as search box */
+  margin-right: .25rem;               /* space between it and the search bar */
 }
 
-.sort-select {
-  appearance: none;
-  width: 100%;
-  height: 100%;
-  padding: 0 var(--input-horizontal-padding);
-  border: none;
-  background: transparent;
-  color: transparent; /* hide native text */
+.sort-label {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1rem;
+  color: var(--text-color);
+  transition: color 0.2s;
+}
+.sort-dropdown:hover .sort-label {
+  color: var(--text-color2);
+}
+
+/* arrow styling */
+.sort-arrow {
+  display: inline-block;             /* needed so rotate actually happens */
+  margin-left: .25rem;
+  transition: transform 0.3s ease;
+  transform: rotate(0deg);
+}
+
+/* little lift on hover */
+.sort-dropdown:hover .sort-arrow {
+  transform: translateY(-1px) rotate(0deg);
+}
+
+/* rotate when open */
+.sort-dropdown.open .sort-arrow {
+  transform: rotate(180deg);
+}
+
+/* the menu container */
+.sort-menu {
+  position: absolute;
+  top: 100%;
+  left: var(--input-horizontal-padding);
+  transform-origin: top center;
+  transform: scaleY(0);
+  opacity: 0;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+  background: var(--primary-bg);
+  border: 1px solid var(--outline-color);
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  z-index: 10;
+}
+
+/* grow into view */
+.sort-dropdown.open .sort-menu {
+  transform: scaleY(1);
+  opacity: 1;
+}
+
+/* each option */
+.sort-menu-item {
+  padding: var(--input-vertical-padding) var(--input-horizontal-padding);
+  white-space: nowrap;
+  color: var(--text-color);
+  transition: background 0.2s, color 0.2s;
   cursor: pointer;
 }
 
-.sort-dropdown::after {
-  content: var(--sort-placeholder, 'sort by') ' ' var(--sort-arrow, '▼');
-  position: absolute;
-  top: 50%;
-  left: var(--input-horizontal-padding);
-  transform: translateY(-50%);
-  pointer-events: none;
-  font-size: 1rem;
-  color: var(--text-color);
-}
-
-.sort-select option {
-  color: var(--primary-bg);
-}
-
-.sort-select::-ms-expand {
-  display: none;
+/* hover highlight */
+.sort-menu-item:hover {
+  color: var(--text-color2);
 }
 
 /*==============================================================================

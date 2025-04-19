@@ -1,0 +1,63 @@
+/*==============================================================================
+  About Page
+==============================================================================*/
+.about-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem;
+    font-family: var(--font);      /* your normal font */
+    color: var(--text-color);
+    overflow-y: auto;
+  }
+  
+  /* back‑button now fixed to top‑left of viewport */
+  .btn-back {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    padding: var(--input-vertical-padding) var(--input-horizontal-padding);
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background 0.2s;
+    z-index: 100; /* sit above other content */
+  }
+  .btn-back:hover {
+    background: var(--outline-color);
+  }
+  
+  /* page title */
+  .about-title {
+    margin-top: 0rem;      /* very snug under the back button */
+    margin-bottom: 1rem;
+    font-family: var(--font-special);
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  
+  /* “Stinger” styling */
+  .about-product {
+    font-family: var(--font-special);
+    font-weight: bold;
+  }
+  
+  /* link to Jack Duncan */
+  .about-link {
+    color: var(--text-color);
+    text-decoration: none;
+  }
+  .about-link:hover {
+    color: var(--text-color2);
+  }
+  
+  /* body text */
+  .about-text {
+    line-height: 1.5;
+    margin-bottom: 2rem;
+  }
+  
+  .about-text2 {
+    line-height: 1.5;
+  }
