@@ -22,12 +22,12 @@ export default function MovieDetailsPage() {
 
   // Fetch movie details and trailer
   useEffect(() => {
-    fetch(`/api/movies/${id}`)
+    fetch(`${API}/api/movies/${id}`)
       .then(res => res.json())
       .then(data => setMovie(data))
       .catch(err => console.error('Error fetching movie details:', err));
 
-    fetch(`/api/movies/${id}/trailer`)
+    fetch(`${API}/api/movies/${id}/trailer`)
       .then(res => res.json())
       .then(data => {
         console.log("Trailer endpoint returned:", data);

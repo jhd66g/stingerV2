@@ -63,7 +63,7 @@ function HomePage() {
 
   // On mount: load services & genres, then initial fetch
   useEffect(() => {
-    fetch('/api/streaming-services')
+    fetch('${API}/api/streaming-services')
       .then(res => res.json())
       .then(data => {
         const sorted = data.sort((a, b) => a.localeCompare(b));
@@ -76,7 +76,7 @@ function HomePage() {
         }
       });
 
-    fetch('/api/movies/all')
+    fetch('${API}/api/movies/all')
       .then(res => res.json())
       .then(data => {
         const setG = new Set();
@@ -115,7 +115,7 @@ function HomePage() {
     localStorage.setItem("activeServices", JSON.stringify(activeServices));
     localStorage.setItem("selectedGenres", JSON.stringify(selectedGenres));
 
-    fetch(`/api/movies/filtered?${params}`)
+    fetch(`${API}/api/movies/filtered?${params}`)
       .then(r => r.json())
       .then(data => setFilteredMovies(data));
   };

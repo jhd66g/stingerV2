@@ -22,7 +22,7 @@ export default function SearchResultsPage() {
     }
 
     const timer = setTimeout(() => {
-      fetch(`/api/movies/search?q=${encodeURIComponent(q)}`)
+      fetch(`${API}/api/movies/search?q=${encodeURIComponent(q)}`)
         .then(r => r.json())
         .then(setMovies)
         .catch(console.error);
