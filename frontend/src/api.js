@@ -1,2 +1,2 @@
 // src/api.js
-export const API = 'https://stinger-env.eba-7vf85uj7.us-west-2.elasticbeanstalk.com';
+export const API = 'https://0loo1qa0uj.execute-api.us-west-2.amazonaws.com/Prod/';

@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: StingerV2 backend as Lambda + API Gateway
+
+Globals:
+  Function:
+    Timeout: 30
+
+Resources:
+  MoviesApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: java17
+      Handler: com.example.myapp.LambdaHandler::handleRequest
+      CodeUri: .                # ← build from here
+      Events:
+        ProxyApi:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+
+Outputs:
+  MoviesApiUrl:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
