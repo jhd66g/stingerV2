@@ -20,7 +20,10 @@
        public void addCorsMappings(CorsRegistry registry) {
          registry
           .addMapping("/**")
-          .allowedOrigins("https://stinger.pages.dev")
+          .allowedOrigins(
+            "https://stinger‑streaming.com",
+            "https://api.stinger‑streaming.com"
+          )
           .allowedMethods("GET","POST","PUT","DELETE","OPTIONS")
           .allowCredentials(true);
        }
