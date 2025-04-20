@@ -11,7 +11,7 @@ export default function AboutPage() {
       </button>
       <h1 className="about-title">About</h1>
       <p className="about-text">
-        <span className="about-product">STINGER</span> is a game-changing movie discovery tool built by{' '}
+        <span className="about-product">STINGER</span> is a movie discovery tool built by{' '}
         <a
           href="https://www.linkedin.com/in/jack-duncan-768a38233"
           target="_blank"
