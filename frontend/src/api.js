@@ -1,2 +1,2 @@
 // src/api.js
-export const API = 'https://0loo1qa0uj.execute-api.us-west-2.amazonaws.com/Prod/';
+export const API = process.env.REACT_APP_API_URL || 'http://localhost:8080';
