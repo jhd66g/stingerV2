@@ -6,27 +6,29 @@
 
  package com.example.myapp;
 
- import org.springframework.context.annotation.Bean;
- import org.springframework.context.annotation.Configuration;
- import org.springframework.web.servlet.config.annotation.CorsRegistry;
- import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
- 
- @Configuration
- public class WebConfig {
-   @Bean
-   public WebMvcConfigurer corsConfigurer() {
-     return new WebMvcConfigurer() {
-       @Override
-       public void addCorsMappings(CorsRegistry registry) {
-         registry
-          .addMapping("/**")
-          .allowedOrigins(
-            "https://stinger‑streaming.com",
-            "https://api.stinger‑streaming.com"
-          )
-          .allowedMethods("GET","POST","PUT","DELETE","OPTIONS")
-          .allowCredentials(true);
-       }
-     };
-   }
- }
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+@Configuration
+public class WebConfig {
+  
+  @Bean
+  public CorsFilter corsFilter() {
+    CorsConfiguration config = new CorsConfiguration();
+    // allow your Pages site
+    config.addAllowedOrigin("https://stinger-streaming.com");
+    // if you ever need www or other subdomains, add them here
+    // config.addAllowedOrigin("https://www.stinger‑streaming.com");
+    
+    config.addAllowedMethod("*");       // GET, POST, PUT, DELETE, OPTIONS…
+    config.addAllowedHeader("*");       // any request header
+    config.setAllowCredentials(false);  // change to true if you ever send cookies/auth
+    
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);
+    return new CorsFilter(source);
+  }
+}
