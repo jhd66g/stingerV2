@@ -7,18 +7,20 @@ Globals:
     Timeout: 30
 
 Resources:
-  MoviesApiFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Runtime: java17
-      Handler: com.example.myapp.LambdaHandler::handleRequest
-      CodeUri: .                # ← build from here
-      Events:
-        ProxyApi:
-          Type: Api
-          Properties:
-            Path: /{proxy+}
-            Method: ANY
+    MoviesApiFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+        Runtime: java17
+        MemorySize: 1024
+        Timeout: 60
+        CodeUri: .         # ← point at the folder containing pom.xml
+        Handler: com.example.myapp.LambdaHandler::handleRequest
+        Events:
+          ProxyApi:
+            Type: Api
+            Properties:
+              Path: /{proxy+}
+              Method: ANY
 
 Outputs:
   MoviesApiUrl:
