@@ -1,2 +1,2 @@
 // src/api.js
-export const API = 'https://api.stinger-streaming.com';
+export const API = import.meta.env.REACT_APP_API_URL || 'http://localhost:8080';
