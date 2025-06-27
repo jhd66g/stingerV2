@@ -20,6 +20,8 @@ public class WebConfig {
     CorsConfiguration config = new CorsConfiguration();
     // allow your Pages site
     config.addAllowedOrigin("https://stinger-streaming.com");
+    config.addAllowedOrigin("http://localhost:3000");
+    config.addAllowedOriginPattern("https://*.app.github.dev");
     // if you ever need www or other subdomains, add them here
     // config.addAllowedOrigin("https://www.stinger‑streaming.com");
     
